@@ -48,3 +48,15 @@ dependencies
 
 ```
 
+#Facebook File
+```
+    getQuality();
+    getUrl();
+    getExt();
+    getFilename();
+    getAuthor();
+    getSize();
+    getDuration();
+
+```
+
