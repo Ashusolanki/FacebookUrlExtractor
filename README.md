@@ -32,21 +32,19 @@ dependencies
 #FacebookExtractor
 ```
 
-            new FacebookExtractor() 
-            {
-                @Override
-                protected void onExtractionComplete(FacebookFile fF)
-                {
-                    //Extraction Complete
-                }
-
-                @Override
-                protected void onExtractionFail(String Error)
-                {
-                    //Extraction Fail
-                }
-            }.Extractor(Context, videoURL);
-
+      new FacebookExtractor()
+      {
+          @Override
+          protected void onExtractionComplete(FacebookFile FbFile)
+          {
+              //Complate
+          }
+          @Override
+          protected void onExtractionFail(String Error) 
+          {
+              //Fail
+          }
+      }.Extractor(this.getActivity(), videoURL);
 
 ```
 
