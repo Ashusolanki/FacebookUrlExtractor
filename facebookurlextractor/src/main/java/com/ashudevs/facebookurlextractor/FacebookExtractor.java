@@ -129,7 +129,7 @@ public abstract class FacebookExtractor extends AsyncTask<Void,Integer, Facebook
                 {
                     String vUrl = hdVideoMatcher.group();
                     vUrl = vUrl.substring(8,vUrl.length()-1); //hd_scr: 8 char
-
+                    facebookFile.setHdUrl(vUrl);
                    if(showLogs){ Log.e("Extractor","HD_URL :: "+vUrl);}
                 }
                 else

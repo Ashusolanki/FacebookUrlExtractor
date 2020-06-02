@@ -23,7 +23,7 @@ And the dependency:
 ```
 dependencies 
  {
-    implementation 'com.github.Ashusolanki:FacebookUrlExtractor:0.0.4'
+    implementation 'com.github.Ashusolanki:FacebookUrlExtractor:0.0.5'
  }
 ```  
 
