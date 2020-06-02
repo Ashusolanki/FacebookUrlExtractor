@@ -32,7 +32,7 @@ dependencies
 #FacebookExtractor
 ```
 
-      new FacebookExtractor(this,"Video Url")
+      new FacebookExtractor(this,"Video Url",false)
         {
             @Override
             protected void onExtractionComplete(ArrayList<FacebookFile> facebookFiles) {
