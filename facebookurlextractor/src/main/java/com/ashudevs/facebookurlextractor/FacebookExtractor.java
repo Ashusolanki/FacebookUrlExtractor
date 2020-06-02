@@ -17,6 +17,10 @@ public abstract class FacebookExtractor extends AsyncTask<Void,Integer, ArrayLis
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36";
     private Context context;
     String url;
+    private long startTime = 0L;
+    private boolean showLogs = false;
+
+    //For Errors
     private Exception exception = null;
 
 
@@ -114,7 +118,7 @@ public abstract class FacebookExtractor extends AsyncTask<Void,Integer, ArrayLis
                     sdFile.setUrl(vUrl);
                     sdFile.setExt("mp4");
                     facebookFiles.add(sdFile);
-                    Log.e("Extractor","SD_URL :: "+vUrl);
+                   if(showLogs){ Log.e("Extractor","SD_URL :: "+vUrl);}
                 }
 
                 if(hdVideoMatcher.find())
@@ -128,7 +132,7 @@ public abstract class FacebookExtractor extends AsyncTask<Void,Integer, ArrayLis
                     hdFile.setUrl(vUrl);
                     hdFile.setExt("mp4");
                     facebookFiles.add(hdFile);
-                    Log.e("Extractor","HD_URL :: "+vUrl);
+                   if(showLogs){ Log.e("Extractor","HD_URL :: "+vUrl);}
                 }
 
                 if(facebookFiles.isEmpty())
@@ -156,6 +160,9 @@ public abstract class FacebookExtractor extends AsyncTask<Void,Integer, ArrayLis
     @Override
     protected void onPostExecute(ArrayList<FacebookFile> facebookFiles) {
         super.onPostExecute(facebookFiles);
+        if(showLogs){
+            Log.e("Extractor","Extraction Time Taken "+(System.currentTimeMillis()-startTime)+" MS");
+        }
         if(facebookFiles!=null) {
             onExtractionComplete(facebookFiles);
         }
@@ -166,9 +173,14 @@ public abstract class FacebookExtractor extends AsyncTask<Void,Integer, ArrayLis
     }
 
 
-    public FacebookExtractor(Context context, String url) {
+
+    public FacebookExtractor(Context context, String url,boolean showLogs) {
         this.context = context;
         this.url = url;
+        this.showLogs = showLogs;
+        startTime = System.currentTimeMillis();
+
+        if(showLogs){ Log.e("Extractor","Extraction Started "+startTime+" MS");}
         this.execute();
     }
 }

@@ -16,7 +16,7 @@ public class ExtractionTestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_extraction_test);
 
-        new FacebookExtractor(this,"https://www.facebook.com/MUafridi2/videos/124215325906086")
+        new FacebookExtractor(this,"https://www.facebook.com/MUafridi2/videos/124215325906086",false)
         {
             @Override
             protected void onExtractionComplete(ArrayList<FacebookFile> facebookFiles) {
