@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public abstract class FacebookExtractor extends AsyncTask<Void,Integer, ArrayList<FacebookFile>> {
+public abstract class FacebookExtractor extends AsyncTask<Void,Integer, FacebookFile> {
 
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36";
     private Context context;
@@ -24,13 +24,11 @@ public abstract class FacebookExtractor extends AsyncTask<Void,Integer, ArrayLis
     private Exception exception = null;
 
 
-    protected abstract void onExtractionComplete(ArrayList<FacebookFile> facebookFiles);
+    protected abstract void onExtractionComplete(FacebookFile facebookFile);
     protected abstract void onExtractionFail(Exception Error);
 
-    private ArrayList<FacebookFile> parseHtml(String url)
+    private FacebookFile parseHtml(String url)
     {
-        ArrayList<FacebookFile> facebookFiles = new ArrayList<>();
-
         try {
             URL getUrl = new URL(url);
             HttpURLConnection urlConnection = (HttpURLConnection) getUrl.openConnection();
@@ -107,40 +105,45 @@ public abstract class FacebookExtractor extends AsyncTask<Void,Integer, ArrayLis
                 Pattern hdVideo = Pattern.compile("(hd_src):\"(.+?)\"");
                 Matcher hdVideoMatcher = hdVideo.matcher(streamMap);
 
+
+                FacebookFile facebookFile = new FacebookFile();
+                facebookFile.setAuthor(authorName);
+                facebookFile.setFilename(fileName);
+                facebookFile.setExt("mp4");
+
                 if(sdVideoMatcher.find())
                 {
-                    FacebookFile sdFile = new FacebookFile();
-                    sdFile.setAuthor(authorName);
-                    sdFile.setFilename(fileName);
-                    sdFile.setQuality("SD-VIDEO");
                     String vUrl = sdVideoMatcher.group();
                     vUrl = vUrl.substring(8,vUrl.length()-1); //sd_scr: 8 char
-                    sdFile.setUrl(vUrl);
-                    sdFile.setExt("mp4");
-                    facebookFiles.add(sdFile);
+                    facebookFile.setSdUrl(vUrl);
+
+
                    if(showLogs){ Log.e("Extractor","SD_URL :: "+vUrl);}
+                }
+                else
+                {
+                    facebookFile.setSdUrl(null);
                 }
 
                 if(hdVideoMatcher.find())
                 {
-                    FacebookFile hdFile = new FacebookFile();
-                    hdFile.setAuthor(authorName);
-                    hdFile.setFilename(fileName);
-                    hdFile.setQuality("HD-VIDEO");
                     String vUrl = hdVideoMatcher.group();
                     vUrl = vUrl.substring(8,vUrl.length()-1); //hd_scr: 8 char
-                    hdFile.setUrl(vUrl);
-                    hdFile.setExt("mp4");
-                    facebookFiles.add(hdFile);
+
                    if(showLogs){ Log.e("Extractor","HD_URL :: "+vUrl);}
                 }
+                else
+                {
+                    facebookFile.setHdUrl(null);
+                }
 
-                if(facebookFiles.isEmpty())
+                if(facebookFile.getSdUrl() == null && facebookFile.getHdUrl()==null)
                 {
                     exception = new RuntimeException("Url Not Valid");
                     return null;
                 }
 
+                return facebookFile;
             }
         }
         catch (Exception E)
@@ -148,17 +151,16 @@ public abstract class FacebookExtractor extends AsyncTask<Void,Integer, ArrayLis
             exception = E;
             return null;
         }
-        return facebookFiles;
     }
 
     @Override
-    protected ArrayList<FacebookFile> doInBackground(Void... voids) {
-        ArrayList<FacebookFile> Ff = parseHtml(url);
+    protected FacebookFile doInBackground(Void... voids) {
+        FacebookFile Ff = parseHtml(url);
         return Ff;
     }
 
     @Override
-    protected void onPostExecute(ArrayList<FacebookFile> facebookFiles) {
+    protected void onPostExecute(FacebookFile facebookFiles) {
         super.onPostExecute(facebookFiles);
         if(showLogs){
             Log.e("Extractor","Extraction Time Taken "+(System.currentTimeMillis()-startTime)+" MS");

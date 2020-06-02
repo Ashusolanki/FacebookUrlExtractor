@@ -19,16 +19,14 @@ public class ExtractionTestActivity extends AppCompatActivity {
         new FacebookExtractor(this,"https://www.facebook.com/MUafridi2/videos/124215325906086",false)
         {
             @Override
-            protected void onExtractionComplete(ArrayList<FacebookFile> facebookFiles) {
-                for (FacebookFile facebookFile : facebookFiles) {
-                    Log.e("TAG","---------------------------------------");
-                    Log.e("TAG","facebookFile AutherName :: "+facebookFile.getAuthor());
-                    Log.e("TAG","facebookFile FileName :: "+facebookFile.getFilename());
-                    Log.e("TAG","facebookFile Ext :: "+facebookFile.getExt());
-                    Log.e("TAG","facebookFile Url :: "+facebookFile.getUrl());
-                    Log.e("TAG","facebookFile Quality :: "+facebookFile.getQuality());
-                    Log.e("TAG","---------------------------------------");
-                }
+            protected void onExtractionComplete(FacebookFile facebookFile) {
+                Log.e("TAG","---------------------------------------");
+                Log.e("TAG","facebookFile AutherName :: "+facebookFile.getAuthor());
+                Log.e("TAG","facebookFile FileName :: "+facebookFile.getFilename());
+                Log.e("TAG","facebookFile Ext :: "+facebookFile.getExt());
+                Log.e("TAG","facebookFile SD :: "+facebookFile.getSdUrl());
+                Log.e("TAG","facebookFile HD :: "+facebookFile.getHdUrl());
+                Log.e("TAG","---------------------------------------");
             }
 
             @Override

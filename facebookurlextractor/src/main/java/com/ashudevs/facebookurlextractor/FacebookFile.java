@@ -1,8 +1,8 @@
 package com.ashudevs.facebookurlextractor;
 
 public class FacebookFile {
-    private String quality;
-    private String url;
+    private String sdUrl;
+    private String hdUrl;
     private String ext;
     private String filename;
     private String author;
@@ -15,21 +15,6 @@ public class FacebookFile {
         this.author = author;
     }
 
-    public String getQuality() {
-        return quality;
-    }
-
-    public void setQuality(String quality) {
-        this.quality = quality;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
 
     public String getExt() {
         return ext;
@@ -45,5 +30,21 @@ public class FacebookFile {
 
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    public String getSdUrl() {
+        return sdUrl;
+    }
+
+    public void setSdUrl(String sdUrl) {
+        this.sdUrl = sdUrl;
+    }
+
+    public String getHdUrl() {
+        return hdUrl;
+    }
+
+    public void setHdUrl(String hdUrl) {
+        this.hdUrl = hdUrl;
     }
 }

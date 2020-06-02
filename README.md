@@ -23,7 +23,7 @@ And the dependency:
 ```
 dependencies 
  {
-    implementation 'com.github.Ashusolanki:FacebookUrlExtractor:0.0.2'
+    implementation 'com.github.Ashusolanki:FacebookUrlExtractor:0.0.4'
  }
 ```  
 
@@ -35,16 +35,14 @@ dependencies
       new FacebookExtractor(this,"Video Url",false)
         {
             @Override
-            protected void onExtractionComplete(ArrayList<FacebookFile> facebookFiles) {
-                for (FacebookFile facebookFile : facebookFiles) {
-                    Log.e("TAG","---------------------------------------");
-                    Log.e("TAG","facebookFile AutherName :: "+facebookFile.getAuthor());
-                    Log.e("TAG","facebookFile FileName :: "+facebookFile.getFilename());
-                    Log.e("TAG","facebookFile Ext :: "+facebookFile.getExt());
-                    Log.e("TAG","facebookFile Url :: "+facebookFile.getUrl());
-                    Log.e("TAG","facebookFile Quality :: "+facebookFile.getQuality());
-                    Log.e("TAG","---------------------------------------");
-                }
+            protected void onExtractionComplete(FacebookFile facebookFile) {
+                Log.e("TAG","---------------------------------------");
+                Log.e("TAG","facebookFile AutherName :: "+facebookFile.getAuthor());
+                Log.e("TAG","facebookFile FileName :: "+facebookFile.getFilename());
+                Log.e("TAG","facebookFile Ext :: "+facebookFile.getExt());
+                Log.e("TAG","facebookFile SD :: "+facebookFile.getSdUrl());
+                Log.e("TAG","facebookFile HD :: "+facebookFile.getHdUrl());
+                Log.e("TAG","---------------------------------------");
             }
 
             @Override
@@ -58,11 +56,12 @@ dependencies
 
 #Facebook File
 ```
-    getQuality();
     getUrl();
     getExt();
     getFilename();
     getAuthor();
+    getSdUrl();
+    getHdUrl();
 
 ```
 
