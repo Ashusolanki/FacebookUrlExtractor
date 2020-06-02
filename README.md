@@ -23,7 +23,7 @@ And the dependency:
 ```
 dependencies 
  {
-    implementation 'com.github.Ashusolanki:FacebookUrlExtractor:0.0.1'
+    implementation 'com.github.Ashusolanki:FacebookUrlExtractor:0.0.2'
  }
 ```  
 
@@ -32,19 +32,27 @@ dependencies
 #FacebookExtractor
 ```
 
-      new FacebookExtractor()
-      {
-          @Override
-          protected void onExtractionComplete(FacebookFile FbFile)
-          {
-              //Complate
-          }
-          @Override
-          protected void onExtractionFail(String Error) 
-          {
-              //Fail
-          }
-      }.Extractor(this.getActivity(), videoURL);
+      new FacebookExtractor(this,"Video Url",false)
+        {
+            @Override
+            protected void onExtractionComplete(ArrayList<FacebookFile> facebookFiles) {
+                for (FacebookFile facebookFile : facebookFiles) {
+                    Log.e("TAG","---------------------------------------");
+                    Log.e("TAG","facebookFile AutherName :: "+facebookFile.getAuthor());
+                    Log.e("TAG","facebookFile FileName :: "+facebookFile.getFilename());
+                    Log.e("TAG","facebookFile Ext :: "+facebookFile.getExt());
+                    Log.e("TAG","facebookFile Url :: "+facebookFile.getUrl());
+                    Log.e("TAG","facebookFile Quality :: "+facebookFile.getQuality());
+                    Log.e("TAG","---------------------------------------");
+                }
+            }
+
+            @Override
+            protected void onExtractionFail(Exception error) {
+                Log.e("Error","Error :: "+error.getMessage());
+                error.printStackTrace();
+            }
+        };
 
 ```
 
@@ -55,8 +63,6 @@ dependencies
     getExt();
     getFilename();
     getAuthor();
-    getSize();
-    getDuration();
 
 ```
 
