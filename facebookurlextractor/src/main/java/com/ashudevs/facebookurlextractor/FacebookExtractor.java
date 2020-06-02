@@ -1,7 +1,6 @@
 package com.ashudevs.facebookurlextractor;
 
 import android.content.Context;
-import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -9,28 +8,25 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.net.ssl.HttpsURLConnection;
-
-public abstract class FacebookExtractor extends AsyncTask<Void,Integer, FacebookFile> {
+public abstract class FacebookExtractor extends AsyncTask<Void,Integer, ArrayList<FacebookFile>> {
 
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36";
-    Context mContext;
+    private Context context;
     String url;
+    private Exception exception = null;
 
 
+    protected abstract void onExtractionComplete(ArrayList<FacebookFile> facebookFiles);
+    protected abstract void onExtractionFail(Exception Error);
 
-    protected abstract void onExtractionComplete(FacebookFile vimeoFile);
-    protected abstract void onExtractionFail(String Error);
-
-    private FacebookFile parseHtml(String url)
+    private ArrayList<FacebookFile> parseHtml(String url)
     {
-        String result="";
-        String filename="";
-        FacebookFile Ff=new FacebookFile();
+        ArrayList<FacebookFile> facebookFiles = new ArrayList<>();
+
         try {
             URL getUrl = new URL(url);
             HttpURLConnection urlConnection = (HttpURLConnection) getUrl.openConnection();
@@ -56,85 +52,11 @@ public abstract class FacebookExtractor extends AsyncTask<Void,Integer, Facebook
             }
 
             if (streamMap.toString().contains("You must log in to continue.")) {
-                result = "Not Public Video";
-            } else {
-
-                /*Pattern videoPattern = Pattern.compile("<div class=\"_53mw\" (.+?)</div>");
-                Matcher videoPAtternMatcher = videoPattern.matcher(streamMap);
-
-                if (videoPAtternMatcher.find()) {
-
-                    result = streamMap.substring(videoPAtternMatcher.start(), videoPAtternMatcher.end());
-                    Pattern VideoSrcPattern = Pattern.compile("\"src\":\"(.+?)\"");
-                    Matcher VideoSrcPatternMatcher = VideoSrcPattern.matcher(result);
-                    if (VideoSrcPatternMatcher.find()) {
-                        result = result.substring(VideoSrcPatternMatcher.start(), VideoSrcPatternMatcher.end());
-                        result = result.replace("\"src\":\"", "").replace("\"", "");
-                        Pattern VideoSrcPatternExt = Pattern.compile("\\.([a-z,0-9]{3,4})\\?");
-                        Matcher VideoSrcPatternMatcherExt = VideoSrcPatternExt.matcher(result);
-                        if (VideoSrcPatternMatcherExt.find()) {
-                            String ext = result.substring(VideoSrcPatternMatcherExt.start(), VideoSrcPatternMatcherExt.end());
-                            ext = ext.replace("?", "");
-                            Ff.setFilename(filename);
-                            Ff.setExt(ext);
-                            Ff.setUrl(result);
-                        }
-                    }
-                    //Log.e("HTML", "" + result);
-
-                } else {
-
-                    Pattern videoPattern2 = Pattern.compile("<div class=\"_53mw _2g8e\" (.+?)</div>");
-                    Matcher videoPAtternMatcher2 = videoPattern2.matcher(streamMap);
-                    if (videoPAtternMatcher2.find()) {
-
-                        result = streamMap.substring(videoPAtternMatcher2.start(), videoPAtternMatcher2.end());
-                        result = result.replace("&quot;", "\"");
-                        Pattern VideoSrcPattern = Pattern.compile("\"src\":\"(.+?)\"");
-                        Matcher VideoSrcPatternMatcher = VideoSrcPattern.matcher(result);
-                        if (VideoSrcPatternMatcher.find()) {
-                            result = result.substring(VideoSrcPatternMatcher.start(), VideoSrcPatternMatcher.end());
-                            result = result.replace("\"src\":\"", "").replace("\"", "");
-                            Pattern VideoSrcPatternExt = Pattern.compile("\\.([a-z,0-9]{3,4})\\?");
-                            Matcher VideoSrcPatternMatcherExt = VideoSrcPatternExt.matcher(result);
-                            if (VideoSrcPatternMatcherExt.find()) {
-                                String ext = result.substring(VideoSrcPatternMatcherExt.start(), VideoSrcPatternMatcherExt.end());
-                                ext = ext.replace("?", "");
-                                Ff.setFilename(filename);
-                                Ff.setExt(ext);
-                                Ff.setUrl(result);
-
-                                try {
-                                    HttpsURLConnection videoDetails =(HttpsURLConnection) new URL(result).openConnection();
-                                    videoDetails.connect();
-
-                                    long x = videoDetails.getContentLength();
-                                    long fileSizeInKB = x / 1024;
-                                    long fileSizeInMB = fileSizeInKB / 1024;
-                                    //Log.e("File Size", "Getted File Size : " + fileSizeInMB);
-
-                                    Ff.setSize((fileSizeInMB > 1) ? fileSizeInMB + " MB" : fileSizeInKB + " KB");
-
-                                    videoDetails.disconnect();
-
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-
-                            }
-                        }
-
-                        //Log.e("HTML", "" + result);
-
-                    } else {
-                        result = null;
-                    }
-                }*/
-
-
-
-                Pattern metaTAGVideoSRC = Pattern.compile("<meta property=\"og:video\"(.+?)\" />");
-                Matcher metaTAGVideoSRCPatternMatcher= metaTAGVideoSRC.matcher(streamMap);
+                exception = new RuntimeException("You must log in to continue.");
+                return null;
+            }
+            else
+            {
 
                 Pattern metaTAGTitle = Pattern.compile("<meta property=\"og:title\"(.+?)\" />");
                 Matcher metaTAGTitleMatcher = metaTAGTitle.matcher(streamMap);
@@ -142,33 +64,9 @@ public abstract class FacebookExtractor extends AsyncTask<Void,Integer, Facebook
                 Pattern metaTAGDescription = Pattern.compile("<meta property=\"og:description\"(.+?)\" />");
                 Matcher metaTAGDescriptionMatcher = metaTAGDescription.matcher(streamMap);
 
-                Pattern metaTAGType = Pattern.compile("<meta property=\"og:video:type\"(.+?)\" />");
-                Matcher metaTAGTypeMatcher = metaTAGType.matcher(streamMap);
+                String authorName = "";
+                String fileName = "";
 
-
-                if(metaTAGVideoSRCPatternMatcher.find())
-                {
-                    String metaTAG = streamMap.substring(metaTAGVideoSRCPatternMatcher.start(),metaTAGVideoSRCPatternMatcher.end());
-                    Pattern srcFind = Pattern.compile("content=\"(.+?)\"");
-                    Matcher srcFindMatcher= srcFind.matcher(metaTAG);
-                    if(srcFindMatcher.find())
-                    {
-                        String src = metaTAG.substring(srcFindMatcher.start(),srcFindMatcher.end()).replace("content=","").replace("\"","");
-                        Ff.setUrl(src.replace("&amp;","&"));
-
-                        HttpsURLConnection openUrl =(HttpsURLConnection) new URL(src).openConnection();
-                        openUrl.connect();
-                        long x = openUrl.getContentLength();
-                        long fileSizeInKB = x / 1024;
-                        long fileSizeInMB = fileSizeInKB / 1024;
-                        Ff.setSize((fileSizeInMB > 1) ? fileSizeInMB + " MB" : fileSizeInKB + " KB");
-                        openUrl.disconnect();
-                    }
-                }
-                else
-                {
-                    return null;
-                }
                 if(metaTAGTitleMatcher.find())
                 {
                     String author = streamMap.substring(metaTAGTitleMatcher.start(),metaTAGTitleMatcher.end());
@@ -176,11 +74,11 @@ public abstract class FacebookExtractor extends AsyncTask<Void,Integer, Facebook
 
                     author = author.replace("<meta property=\"og:title\" content=\"","").replace("\" />","");
 
-                    Ff.setAuthor(author);
+                    authorName = author;
                 }
                 else
                 {
-                    Ff.setAuthor("fbdescription");
+                    authorName = "N/A";
                 }
 
                 if(metaTAGDescriptionMatcher.find())
@@ -192,79 +90,84 @@ public abstract class FacebookExtractor extends AsyncTask<Void,Integer, Facebook
 
                     name = name.replace("<meta property=\"og:description\" content=\"","").replace("\" />","");
 
-                    Ff.setFilename(name);
+                    fileName = name;
                 }
                 else
                 {
-                    Ff.setFilename("fbdescription");
+                    fileName = "N/A";
                 }
 
-                if(metaTAGTypeMatcher.find())
+                Pattern sdVideo = Pattern.compile("(sd_src):\"(.+?)\"");
+                Matcher sdVideoMatcher = sdVideo.matcher(streamMap);
+
+                Pattern hdVideo = Pattern.compile("(hd_src):\"(.+?)\"");
+                Matcher hdVideoMatcher = hdVideo.matcher(streamMap);
+
+                if(sdVideoMatcher.find())
                 {
-                    String ext = streamMap.substring(metaTAGTypeMatcher.start(),metaTAGTypeMatcher.end());
-                    Log.e("Extractor","EXT :: "+ext);
-
-                    ext = ext.replace("<meta property=\"og:video:type\" content=\"","").replace("\" />","").replace("video/","");
-
-                    Ff.setExt(ext);
+                    FacebookFile sdFile = new FacebookFile();
+                    sdFile.setAuthor(authorName);
+                    sdFile.setFilename(fileName);
+                    sdFile.setQuality("SD-VIDEO");
+                    String vUrl = sdVideoMatcher.group();
+                    vUrl = vUrl.substring(8,vUrl.length()-1); //sd_scr: 8 char
+                    sdFile.setUrl(vUrl);
+                    sdFile.setExt("mp4");
+                    facebookFiles.add(sdFile);
+                    Log.e("Extractor","SD_URL :: "+vUrl);
                 }
-                else
+
+                if(hdVideoMatcher.find())
                 {
-                    Ff.setExt("mp4");
+                    FacebookFile hdFile = new FacebookFile();
+                    hdFile.setAuthor(authorName);
+                    hdFile.setFilename(fileName);
+                    hdFile.setQuality("HD-VIDEO");
+                    String vUrl = hdVideoMatcher.group();
+                    vUrl = vUrl.substring(8,vUrl.length()-1); //hd_scr: 8 char
+                    hdFile.setUrl(vUrl);
+                    hdFile.setExt("mp4");
+                    facebookFiles.add(hdFile);
+                    Log.e("Extractor","HD_URL :: "+vUrl);
                 }
 
-                try {
-                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                    retriever.setDataSource(Ff.getUrl(), new HashMap<String, String>());
-                    Ff.setDuration(Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)));
-                }catch (Exception E)
+                if(facebookFiles.isEmpty())
                 {
-                    Ff.setDuration(0);
+                    exception = new RuntimeException("Url Not Valid");
+                    return null;
                 }
 
             }
-
-        return Ff;
         }
         catch (Exception E)
         {
-            E.printStackTrace();
+            exception = E;
             return null;
         }
+        return facebookFiles;
     }
 
     @Override
-    protected FacebookFile doInBackground(Void... voids) {
-        FacebookFile Ff = parseHtml(url);
+    protected ArrayList<FacebookFile> doInBackground(Void... voids) {
+        ArrayList<FacebookFile> Ff = parseHtml(url);
         return Ff;
     }
 
     @Override
-    protected void onPostExecute(FacebookFile facebookFiles) {
+    protected void onPostExecute(ArrayList<FacebookFile> facebookFiles) {
         super.onPostExecute(facebookFiles);
         if(facebookFiles!=null) {
-
-
-            Log.e("FB","URL :: "+facebookFiles.getUrl());
-            Log.e("FB","Author :: "+facebookFiles.getAuthor());
-            Log.e("FB","Ext :: "+facebookFiles.getExt());
             onExtractionComplete(facebookFiles);
         }
         else
         {
-            onExtractionFail("Somthing Wrong...!!");
+            onExtractionFail(exception);
         }
     }
 
-    @Override
-    protected void onCancelled() {
-        super.onCancelled();
 
-        onExtractionFail("Somthing Wrong...!!");
-    }
-
-    public void Extractor(Context mContext, String url) {
-        this.mContext = mContext;
+    public FacebookExtractor(Context context, String url) {
+        this.context = context;
         this.url = url;
         this.execute();
     }
